@@ -14,8 +14,10 @@ export default function WelcomePage() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-cover bg-center bg-no-repeat text-white overflow-hidden relative" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&q=80&w=2070&ixlib=rb-4.0.3')" }}>
-      {/* Adjust the overlay's opacity */}
-      <div className={`absolute inset-0 bg-black transition-opacity duration-1000 ${isLoaded ? 'bg-opacity-30' : 'bg-opacity-0'}`}></div>
+      {/* Left gradient overlay with subtle dark effect */}
+      <div className={`absolute inset-0 bg-gradient-to-r from-black/50 to-transparent transition-opacity duration-1000 ${isLoaded ? 'bg-opacity-100' : 'bg-opacity-0'}`}></div>
+      {/* Right gradient overlay with subtle dark effect */}
+      <div className={`absolute inset-0 bg-gradient-to-l from-black/50 to-transparent transition-opacity duration-1000 ${isLoaded ? 'bg-opacity-100' : 'bg-opacity-0'}`}></div>
       <div className="relative z-10 text-center px-4 sm:px-6 lg:px-8">
         <h1 className={`text-4xl sm:text-5xl md:text-6xl font-extrabold mb-4 transition-all duration-1000 transform ${isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
           Welcome to Mountain Explorer
