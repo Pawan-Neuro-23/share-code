@@ -1,45 +1,139 @@
-// src/MyAgGridTable.js
-import React, { useState } from 'react';
-import { AgGridReact } from 'ag-grid-react';
-import 'ag-grid-community/styles/ag-grid.css';
-import 'ag-grid-community/styles/ag-theme-alpine.css';
+import React, { useState, useRef } from 'react';
 
-const MyAgGridTable = () => {
-  const [rowData, setRowData] = useState([
-    { name: 'John Doe', age: 28, city: 'New York' },
-    { name: 'Jane Smith', age: 32, city: 'Los Angeles' },
-    { name: 'Michael Johnson', age: 45, city: 'Chicago' },
-    { name: 'Emily Davis', age: 30, city: 'San Francisco' }
+ const  DataGrid = () => {
+  const [rows, setRows] = useState([
+    { id: 1, col1: 'Row 1 Col 1', col2: 'Row 1 Col 2', col3: 'Row 1 Col 3' },
+    { id: 2, col1: 'Row 2 Col 1', col2: 'Row 2 Col 2', col3: 'Row 2 Col 3' },
+    { id: 3, col1: 'Row 3 Col 1', col2: 'Row 3 Col 2', col3: 'Row 3 Col 3' },
   ]);
+  
+  const [colWidths, setColWidths] = useState([200, 200, 200]);
+  const resizeRef = useRef(null);
 
-  const [columnDefs] = useState([
-    { headerName: 'Name', field: 'name', editable: true, resizable: true },
-    { headerName: 'Age', field: 'age', editable: true, resizable: true },
-    { headerName: 'City', field: 'city', editable: true, resizable: true }
-  ]);
+  const handleDelete = (id) => {
+    setRows(rows.filter(row => row.id !== id));
+  };
 
-  const onCellValueChanged = (event) => {
-    console.log('Row updated:', event.data);
-    const updatedRowData = rowData.map(row =>
-      row.name === event.data.name ? event.data : row
+  const handleEdit = (id) => {
+    const updatedRows = rows.map(row => 
+      row.id === id ? { ...row, isEditing: !row.isEditing } : row
     );
-    setRowData(updatedRowData);
+    setRows(updatedRows);
+  };
+
+  const handleChange = (id, column, value) => {
+    const updatedRows = rows.map(row => 
+      row.id === id ? { ...row, [column]: value } : row
+    );
+    setRows(updatedRows);
+  };
+
+
+  const handleMouseDown = (index) => {
+    resizeRef.current = index;
+
+    const handleMouseMove = (e) => {
+      const newWidth = e.clientX - resizeRef.current; 
+      if (newWidth > 100) { // Minimum width
+        setColWidths((prevWidths) => {
+          const updatedWidths = [...prevWidths];
+          updatedWidths[index] = newWidth;
+          return updatedWidths;
+        });
+      }
+    };
+
+    const handleMouseUp = () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+      resizeRef.current = null;
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
   };
 
   return (
-    <div className="container mx-auto my-10"> {/* Tailwind class to center and add margins */}
-      <div className="bg-white shadow-md rounded-lg p-4" style={{ width: 'calc(100% - 20rem)', marginLeft: 'auto', marginRight: 'auto' }}>
-        <div className="ag-theme-alpine" style={{ height: 400, width: '100%' }}>
-          <AgGridReact
-            rowData={rowData}
-            columnDefs={columnDefs}
-            defaultColDef={{ resizable: true }}
-            onCellValueChanged={onCellValueChanged}
-          />
-        </div>
-      </div>
+    <div className="overflow-x-auto">
+      <table className="min-w-full border border-gray-300">
+        <thead>
+          <tr className="bg-gray-200">
+            {['Column 1', 'Column 2', 'Column 3'].map((header, index) => (
+              <th
+                key={index}
+                className="border px-4 py-2 relative"
+                style={{ width: colWidths[index] }}
+              >
+                {header}
+                <div
+                  onMouseDown={() => handleMouseDown(index)}
+                  className="absolute right-0 h-full cursor-col-resize"
+                  style={{ width: '10px', top: 0, right: 0 }}
+                />
+              </th>
+            ))}
+            <th className="border px-4 py-2">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map(row => (
+            <tr key={row.id}>
+              <td className="border px-4 py-2">
+                {row.isEditing ? (
+                  <input
+                    type="text"
+                    value={row.col1}
+                    onChange={(e) => handleChange(row.id, 'col1', e.target.value)}
+                    className="border rounded"
+                  />
+                ) : (
+                  row.col1
+                )}
+              </td>
+              <td className="border px-4 py-2">
+                {row.isEditing ? (
+                  <input
+                    type="text"
+                    value={row.col2}
+                    onChange={(e) => handleChange(row.id, 'col2', e.target.value)}
+                    className="border rounded"
+                  />
+                ) : (
+                  row.col2
+                )}
+              </td>
+              <td className="border px-4 py-2">
+                {row.isEditing ? (
+                  <input
+                    type="text"
+                    value={row.col3}
+                    onChange={(e) => handleChange(row.id, 'col3', e.target.value)}
+                    className="border rounded"
+                  />
+                ) : (
+                  row.col3
+                )}
+              </td>
+              <td className="border px-4 py-2 flex space-x-2">
+                <button
+                  onClick={() => handleEdit(row.id)}
+                  className="bg-blue-500 text-white px-2 py-1 rounded"
+                >
+                  {row.isEditing ? 'Save' : 'Edit'}
+                </button>
+                <button
+                  onClick={() => handleDelete(row.id)}
+                  className="bg-red-500 text-white px-2 py-1 rounded"
+                >
+                  Delete
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 };
 
-export default MyAgGridTable;
+export default DataGrid
