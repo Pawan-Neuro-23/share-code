@@ -66,13 +66,13 @@ const DataGrid = () => {
             {['Column 1', 'Column 2', 'Column 3'].map((header, index) => (
               <th
                 key={index}
-                className="border px-4 py-2 relative"
+                className="border-r-2 border-gray-600 last:border-0 px-4 py-2 relative"
                 style={{ width: colWidths[index] }}
               >
                 {header}
                 <div
                   onMouseDown={(e) => handleMouseDown(index, e)}
-                  className="absolute right-0 h-full cursor-col-resize border-l-2 border-gray-500"
+                  className="absolute right-0 h-full cursor-col-resize"
                   style={{ width: '10px', top: 0, right: 0 }}
                 />
               </th>
