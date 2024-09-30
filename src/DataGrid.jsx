@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 
- const  DataGrid = () => {
+const DataGrid = () => {
   const [rows, setRows] = useState([
     { id: 1, col1: 'Row 1 Col 1', col2: 'Row 1 Col 2', col3: 'Row 1 Col 3' },
     { id: 2, col1: 'Row 2 Col 1', col2: 'Row 2 Col 2', col3: 'Row 2 Col 3' },
@@ -9,6 +9,36 @@ import React, { useState, useRef } from 'react';
   
   const [colWidths, setColWidths] = useState([200, 200, 200]);
   const resizeRef = useRef(null);
+  const startX = useRef(0);
+  const startWidth = useRef(0);
+  
+  const handleMouseDown = (index, e) => {
+    resizeRef.current = index;
+    startX.current = e.clientX;
+    startWidth.current = colWidths[index];
+
+    const handleMouseMove = (e) => {
+      if (resizeRef.current !== null) {
+        const newWidth = startWidth.current + (e.clientX - startX.current);
+        if (newWidth > 100) { // Minimum width
+          setColWidths((prevWidths) => {
+            const updatedWidths = [...prevWidths];
+            updatedWidths[resizeRef.current] = newWidth;
+            return updatedWidths;
+          });
+        }
+      }
+    };
+
+    const handleMouseUp = () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+      resizeRef.current = null;
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+  };
 
   const handleDelete = (id) => {
     setRows(rows.filter(row => row.id !== id));
@@ -28,31 +58,6 @@ import React, { useState, useRef } from 'react';
     setRows(updatedRows);
   };
 
-
-  const handleMouseDown = (index) => {
-    resizeRef.current = index;
-
-    const handleMouseMove = (e) => {
-      const newWidth = e.clientX - resizeRef.current; 
-      if (newWidth > 100) { // Minimum width
-        setColWidths((prevWidths) => {
-          const updatedWidths = [...prevWidths];
-          updatedWidths[index] = newWidth;
-          return updatedWidths;
-        });
-      }
-    };
-
-    const handleMouseUp = () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
-      resizeRef.current = null;
-    };
-
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
-  };
-
   return (
     <div className="overflow-x-auto">
       <table className="min-w-full border border-gray-300">
@@ -66,8 +71,8 @@ import React, { useState, useRef } from 'react';
               >
                 {header}
                 <div
-                  onMouseDown={() => handleMouseDown(index)}
-                  className="absolute right-0 h-full cursor-col-resize"
+                  onMouseDown={(e) => handleMouseDown(index, e)}
+                  className="absolute right-0 h-full cursor-col-resize border-l-2 border-gray-500"
                   style={{ width: '10px', top: 0, right: 0 }}
                 />
               </th>
@@ -136,4 +141,4 @@ import React, { useState, useRef } from 'react';
   );
 };
 
-export default DataGrid
+export default DataGrid;
